@@ -1,0 +1,127 @@
+name: lab04
+topology:
+  defaults:
+    kind: linux
+  kinds:
+    linux:
+      image: "{{ lab_container_image }}"
+      labels:
+        LAB_SHELL: "/bin/bash"
+      sysctls:
+        net.ipv4.ip_forward: 0
+        net.ipv6.conf.all.disable_ipv6: 1
+        net.ipv6.conf.default.disable_ipv6: 1
+      exec:
+        - sysctl -w net.ipv6.conf.all.disable_ipv6=1
+  nodes:
+    node1:
+      network-mode: none
+      exec:
+        - ip link set eth1 up
+        - ip addr add 10.0.1.11/24 dev eth1
+        - ip route add default via 10.0.1.1
+    node2:
+      network-mode: none
+      exec:
+        - ip link set eth1 up
+        - ip addr add 10.0.1.12/24 dev eth1
+        - ip route add default via 10.0.1.1
+    node3:
+      network-mode: none
+      exec:
+        - ip link set eth1 up
+        - ip addr add 10.0.2.13/24 dev eth1
+        - ip route add default via 10.0.2.1
+    node4:
+      network-mode: none
+      exec:
+        - ip link set eth1 up
+        - ip addr add 10.0.2.14/24 dev eth1
+        - ip route add default via 10.0.2.1
+        - ip link set eth2 up
+        - mkdir -p /tmp/lab-http
+        - bash -lc 'echo "hello from node4" >/tmp/lab-http/index.html'
+        - bash -lc 'nohup python3 -m http.server 8080 --bind 10.0.2.14 --directory /tmp/lab-http >/tmp/http-server.log 2>&1 &'
+    node5:
+      network-mode: none
+      exec:
+        - ip link set eth1 up
+    router1:
+      network-mode: none
+      exec:
+        - ip link set eth1 up
+        - ip addr add 10.0.1.1/24 dev eth1
+        - ip link set eth2 up
+        - ip addr add 10.0.2.1/24 dev eth2
+        - sysctl -w net.ipv4.ip_forward=1
+    lan1-switch:
+      network-mode: none
+      labels:
+        HIDDEN_NODE: "true"
+      exec:
+        - ip link add br0 type bridge
+        - ip link set br0 up
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set eth3 master br0
+        - ip link set eth1 up
+        - ip link set eth2 up
+        - ip link set eth3 up
+    lan2-switch:
+      network-mode: none
+      labels:
+        HIDDEN_NODE: "true"
+      exec:
+        - ip link add br0 type bridge
+        - ip link set br0 up
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set eth3 master br0
+        - ip link set eth1 up
+        - ip link set eth2 up
+        - ip link set eth3 up
+  links:
+    - type: veth
+      endpoints:
+        - node: lan1-switch
+          interface: eth1
+        - node: node1
+          interface: eth1
+          mac: "0a:00:00:00:00:01"
+    - type: veth
+      endpoints:
+        - node: lan1-switch
+          interface: eth2
+        - node: node2
+          interface: eth1
+          mac: "0a:00:00:00:00:02"
+    - type: veth
+      endpoints:
+        - node: lan1-switch
+          interface: eth3
+        - node: router1
+          interface: eth1
+    - type: veth
+      endpoints:
+        - node: lan2-switch
+          interface: eth1
+        - node: node3
+          interface: eth1
+    - type: veth
+      endpoints:
+        - node: lan2-switch
+          interface: eth2
+        - node: node4
+          interface: eth1
+    - type: veth
+      endpoints:
+        - node: lan2-switch
+          interface: eth3
+        - node: router1
+          interface: eth2
+    - type: veth
+      endpoints:
+        - node: node4
+          interface: eth2
+        - node: node5
+          interface: eth1
