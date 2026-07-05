@@ -32,6 +32,10 @@ exercises.
   Containerlab templates used to define the lab checkpoints. You do not need
   these files for the main tutorial, but they are useful if you are curious
   about how the labs are assembled.
+- [containerlab-images/](containerlab-images/) contains the custom Docker image
+  sources used for the lab nodes. You do not need to build these images during
+  the tutorial, but advanced participants can inspect them to see which tools
+  are available inside the lab containers.
 
 ## Lab checkpoints
 
@@ -75,6 +79,10 @@ worden sein. Nutze dieses Repository, um in die Lab-Umgebung zu kommen und die
   Containerlab-Templates, mit denen die Lab-Checkpoints definiert werden. Diese
   Dateien brauchst du für das Tutorial nicht, aber sie sind interessant, wenn
   du neugierig bist, wie die Labs aufgebaut sind.
+- [containerlab-images/](containerlab-images/) enthält die Quellen für die
+  angepassten Docker-Images der Lab-Nodes. Du musst diese Images im Tutorial
+  nicht bauen, aber fortgeschrittene Teilnehmende können dort nachschauen,
+  welche Tools in den Lab-Containern verfügbar sind.
 
 ### Lab-Checkpoints
 
